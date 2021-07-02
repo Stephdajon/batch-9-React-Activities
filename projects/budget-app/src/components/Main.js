@@ -9,8 +9,8 @@ import Spinner from '../assets/loader.gif'
 export default class Main extends Component {
 
     state = {
-        user: 1,
-        loading: true,
+        user: 1, //userdata
+        loading: true, // getting response from the firebase
         formSwitcher: false
     }
 
@@ -28,6 +28,7 @@ export default class Main extends Component {
         })
     }
 
+    //switch for login and register
     formSwitcher = (action) => {
         console.log(action);
         this.setState({
@@ -36,6 +37,7 @@ export default class Main extends Component {
     }
 
     render(){
+        //variable to switch forms
         const form = !this.state.formSwitcher ? <Login /> : <Register />;
 
             if(this.state.user === 1){
@@ -51,7 +53,7 @@ export default class Main extends Component {
         return(
            <div>
                {!this.state.user ?
-                (<div className="mainBlock">
+                    (<div className="mainBlock">
                     {form}
                     {!this.state.formSwitcher ?
                         (<span className="underLine">
@@ -62,10 +64,11 @@ export default class Main extends Component {
                             Have an account? <button onClick={() => this.formSwitcher(!this.state.formSwitcher ? 'register' : 'login')}
                             className="linkBtn">Sign in here</button>
                         </span>)
-                    }
-                </div>) : (<Tracker />)
-
+                    } 
+                    {/* if formswitcher is false show "not registered" else "already have an account" */}
+                    </div>) : (<Tracker />)
                }
+               {/* if the user is empty display mainBlock else display Tracker */}
            </div>
            
         );
