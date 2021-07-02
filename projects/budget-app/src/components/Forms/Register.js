@@ -10,12 +10,14 @@ class Register extends Component {
         fireErrors: ''
     }
 
+    // function to update the state
     handleChange = e => {
         this.setState({
             [e.target.name]: e.target.value
         })
     }
 
+    //function to submit to firebase
     register = e => {
         e.preventDefault();
         fire.auth().createUserWithEmailAndPassword(this.state.email, this.state.password).then((user) => {
@@ -52,7 +54,6 @@ class Register extends Component {
                     <input type="password"
                     className="regField"
                     placeholder="Password"
-
                     onChange={this.handleChange}
                     value={this.state.password}
                     name="password" />

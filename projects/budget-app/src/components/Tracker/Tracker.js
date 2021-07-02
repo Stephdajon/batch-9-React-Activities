@@ -8,12 +8,20 @@ class Tracker extends Component {
     state = {
         transactions: [],
         money: 0,
-
         transactionName: '',
         transactionType: '',
         price: '',
-        currentUID: fire.auth().currentUser.uid
+        currentUID: fire.auth().currentUser.uid,
+        userName: ''
     }
+
+    componentDidMount(){
+        console.log(fire.auth().currentUser)
+        this.setState({
+            userName: fire.auth().currentUser.displayName
+        })
+    }
+
 
     logout = () => {
         fire.auth().signOut();
@@ -25,12 +33,34 @@ class Tracker extends Component {
         });
     }
 
+    deleteTransaction = (id) => () => {
+        fire.database().ref('Transactions/' + this.state.currentUID + '/' + id).set(null).
+        then(() => {
+            const foundTransaction = this.state.transactions.find(
+                transaction => transaction.id === id
+              );
+              const newBalance =
+                foundTransaction.type === "deposit"
+                  ? this.state.money - parseFloat(foundTransaction.price)
+                  : this.state.money + parseFloat(foundTransaction.price);
+              this.setState({
+                transactions: this.state.transactions.filter(
+                  transaction => transaction.id !== id
+                ),
+                money: newBalance
+              });
+            console.log('delete successful')
+        })
+    }
+
+
     addNewTransaction = () => {
         const {
             transactionName,
             transactionType,
             price,
-            currentUID, money
+            currentUID,
+            money
         } = this.state;
 
         //validation
@@ -57,7 +87,7 @@ class Tracker extends Component {
                     money: transactionType === 'deposit' ? money + parseFloat(price) : money - parseFloat(price),
                     transactionName: '',
                     transactionType: '',
-                    price: ''
+                    price: '',
                 })
             }).catch((error) =>{
                 //error callback
@@ -73,14 +103,14 @@ class Tracker extends Component {
         fire.database().ref('Transactions/' + currentUID).once('value', (snapshot) => {
            // console.log(snapshot)
            snapshot.forEach((childSnapshot) => {
-
+            console.log(childSnapshot.ref.key)
                 totalMoney = 
                 childSnapshot.val().type === 'deposit' ?
                 parseFloat(childSnapshot.val().price) + totalMoney
                 : totalMoney - parseFloat(childSnapshot.val().price)
 
                 BackUpState.push({
-                    id: childSnapshot.val().id,
+                    id: childSnapshot.ref.key,
                     name: childSnapshot.val().name,
                     type: childSnapshot.val().type,
                     price: childSnapshot.val().price,
@@ -97,13 +127,11 @@ class Tracker extends Component {
      
 
     render(){
-
-        var currentUser = fire.auth().currentUser; //debug user
         
         return(
             <div className="trackerBlock">
                 <div className="welcome">
-                    <span>Hi, {currentUser.displayName}!</span>
+                    <span>Hi, {this.state.userName}!</span>
                     <button className="exit" onClick={this.logout}>Logout</button>
                 </div>
                 <div className="totalMoney">${this.state.money}</div>
@@ -145,11 +173,14 @@ class Tracker extends Component {
                     <p>Latest Transactions</p>
                     <ul>
                         {
-                            Object.keys(this.state.transactions).map((id) => (
-                                <Transaction  key={id}
-                                    type={this.state.transactions[id].type}
-                                    name={this.state.transactions[id].name}
-                                    price={this.state.transactions[id].price}
+
+                            this.state.transactions.map((transaction) => (
+                                <Transaction  key={transaction.id}
+                                    id={transaction.id}
+                                    type={transaction.type}
+                                    name={transaction.name}
+                                    price={transaction.price}
+                                    deleteTransaction={this.deleteTransaction}
                                 />
                             ))
                         }
