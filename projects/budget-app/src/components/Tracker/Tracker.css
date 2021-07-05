@@ -129,3 +129,11 @@ ul li:last-child{
 .deposit{
     color: green;
 }
+
+.edit-btn{
+    border: none;
+}
+
+.delete-btn{
+    border: none
+}
